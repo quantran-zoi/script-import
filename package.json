@@ -1,0 +1,17 @@
+{
+  "name": "usersegmentscript",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ion-js": "^5.2.1",
+    "json2csv": "^6.0.0-alpha.2",
+    "node-gzip": "^1.1.2"
+  }
+}
