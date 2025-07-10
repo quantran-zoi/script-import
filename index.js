@@ -3,6 +3,7 @@ const { parse } = require("json2csv");
 const zlib = require("zlib");
 const readline = require("node:readline");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
+const path = require("path");
 
 const OUTPUT_FILENAME = "output_combined.csv";
 const FIELDS = ["PK", "SK", "country", "userId"];
@@ -55,6 +56,20 @@ function processDynamoDBData(line, transformFlag) {
   return handlers[transformFlag]?.(data);
 }
 
+function getFilesFromFolder(folderPath) {
+  try {
+    const files = fs.readdirSync(folderPath).filter(e=>e.endsWith('.json.gz'));
+    console.log(
+      `Found \x1b[32m${files.length}\x1b[0m files in folder: \x1b[32m${folderPath}\x1b[0m`
+    );
+
+    return files.map((file) => path.join(folderPath, file));
+  } catch (error) {
+    console.error("Error reading folder:", error);
+    return [];
+  }
+}
+
 const statistics = {};
 
 async function processDynamoDBJsonFiles(
@@ -92,7 +107,7 @@ async function processDynamoDBJsonFiles(
         fields: ["PK", "SK", "country", "userId"],
         header: false,
       });
-      outputStream.write(csv + "\n");
+      outputStream.write("\n" + csv);
     });
 
     await new Promise((resolve) => {
@@ -115,16 +130,11 @@ async function start() {
 
   fs.writeFileSync(
     OUTPUT_FILENAME,
-    parse([], { fields: FIELDS, header: true }) + "\n"
+    parse([], { fields: FIELDS, header: true }),
   );
 
   console.log("Processing Notification .json.gz files...");
-  const userNotification = [
-    "./data/notifications/3gwsd3mpzm4g3o577pkqajynzm.json.gz",
-    "./data/notifications/3mplb62geq4hrkxdygbpgws3ra.json.gz",
-    "./data/notifications/6dph5ocfbmzxpbcj3oah6hvrxu.json.gz",
-    "./data/notifications/y3gmlzyqvq5xtpmoeei3jhraka.json.gz",
-  ];
+  const userNotification = getFilesFromFolder("./data/notifications");
   await processDynamoDBJsonFiles(
     userNotification,
     OUTPUT_FILENAME,
@@ -132,9 +142,7 @@ async function start() {
   );
 
   console.log("Processing UserSegment .json.gz files...");
-  const userSegments = [
-    "./data/user_segments/p5hvavbzdu2iphoqyezmh53fri.json.gz",
-  ];
+  const userSegments = getFilesFromFolder("./data/user_segments");
   await processDynamoDBJsonFiles(
     userSegments,
     OUTPUT_FILENAME,
@@ -142,12 +150,7 @@ async function start() {
   );
 
   console.log("Processing UserProfile .json.gz files...");
-  const userProfiles = [
-    "./data/user_profiles/3ubo7oa3dq26tdriq34polqili.json.gz",
-    "./data/user_profiles/cfpo6voetayxpljgrctpuv4ivi.json.gz",
-    "./data/user_profiles/l76iacmd6a5ujdmm2d4dtqiypa.json.gz",
-    "./data/user_profiles/t7x6tatmre6wllbubtdhrqup6q.json.gz",
-  ];
+  const userProfiles = getFilesFromFolder('./data/user_profiles');
   await processDynamoDBJsonFiles(
     userProfiles,
     OUTPUT_FILENAME,
@@ -164,9 +167,6 @@ async function start() {
       `\x1b[32mCountry: ${country}\x1b[0m, Count: \x1b[33m${statistics[country]}\x1b[0m`
     );
   });
-
-  const gzippedData = await gzip(fs.readFileSync(OUTPUT_FILENAME));
-  fs.writeFileSync(OUTPUT_FILENAME + ".gzip", gzippedData);
 
   console.log(
     `Output written to ${OUTPUT_FILENAME} and gzipped to ${OUTPUT_FILENAME}.gz`
