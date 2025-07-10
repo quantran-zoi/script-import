@@ -51,14 +51,22 @@ const handlers = {
 
 function processDynamoDBData(line, transformFlag) {
   if (!line) return;
-  const parsed = JSON.parse(line);
+  let parsed;
+  try {
+    parsed = JSON.parse(line);
+  } catch (e) {
+    console.error("\x1b[31mInvalid JSON line skipped\x1b[0m");
+    return null;
+  }
   const data = unmarshall(parsed.Item);
   return handlers[transformFlag]?.(data);
 }
 
 function getFilesFromFolder(folderPath) {
   try {
-    const files = fs.readdirSync(folderPath).filter(e=>e.endsWith('.json.gz'));
+    const files = fs
+      .readdirSync(folderPath)
+      .filter((e) => e.endsWith(".json.gz"));
     console.log(
       `Found \x1b[32m${files.length}\x1b[0m files in folder: \x1b[32m${folderPath}\x1b[0m`
     );
@@ -130,7 +138,7 @@ async function start() {
 
   fs.writeFileSync(
     OUTPUT_FILENAME,
-    parse([], { fields: FIELDS, header: true }),
+    parse([], { fields: FIELDS, header: true })
   );
 
   console.log("Processing Notification .json.gz files...");
@@ -150,7 +158,7 @@ async function start() {
   );
 
   console.log("Processing UserProfile .json.gz files...");
-  const userProfiles = getFilesFromFolder('./data/user_profiles');
+  const userProfiles = getFilesFromFolder("./data/user_profiles");
   await processDynamoDBJsonFiles(
     userProfiles,
     OUTPUT_FILENAME,
