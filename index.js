@@ -166,7 +166,7 @@ async function start() {
   );
 
   console.log(
-    "\x1b[42m\x1b[30mFINISH:\x1b[0m Data processed and combined into a single CSV file"
+    "\x1b[42m\x1b[30mFINISH\x1b[0m : Data processed and combined into a single CSV file"
   );
 
   console.log(`Statistics by country:`);
@@ -177,7 +177,7 @@ async function start() {
   });
 
   console.log(
-    `Output written to ${OUTPUT_FILENAME} and gzipped to ${OUTPUT_FILENAME}.gz`
+    `Output written to \x1b[36m${OUTPUT_FILENAME}\x1b[0m`
   );
 }
 
