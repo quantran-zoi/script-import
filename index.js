@@ -15,7 +15,7 @@ const DATA_TYPE = {
 };
 
 function handleNotification(data) {
-  if (data.language != "vi") return null;
+  if (data.language != "cs") return null;
   return {
     PK: `COUNTRY#CZ`,
     SK: `#USER#${data.userId}`,
@@ -34,7 +34,7 @@ function handleUserSegment(data) {
 }
 
 function handleUserProfile(data) {
-  if (data.country != "VN") return null;
+  if (data.country != "CZ") return null;
   return {
     PK: `COUNTRY#${data.country}`,
     SK: `#USER#${data.userId}`,
